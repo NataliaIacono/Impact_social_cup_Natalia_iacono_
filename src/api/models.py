@@ -10,6 +10,7 @@ class User(db.Model):  # Cambiado a User
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String, nullable=False)
     email = db.Column(db.String, unique=True, nullable=False)
+    contraseña = db.Column(db.String(500), unique=False, nullable=False)
     rol = db.Column(db.String, nullable=False)  # Ejemplo: "gerente" o "colaborador"
 
     tareas = db.relationship("Tarea", back_populates="user")  # Actualizado a "user"
