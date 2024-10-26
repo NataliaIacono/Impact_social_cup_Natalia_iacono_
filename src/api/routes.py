@@ -112,32 +112,24 @@ def get_colaboradores():
         return jsonify({'msg': 'Error al recuperar colaboradores', 'error': str(e)}), 500
     
 
-# Endpoint para crear tareas
-@api.route('/tareas', methods=['POST'])
+# Endpoint para agregar una tarea a una oportunidad específica
+@api.route('/oportunidades/<int:oportunidad_id>/tareas', methods=['POST'])
 @jwt_required()
-def crear_tarea():
+def agregar_tarea(oportunidad_id):
     try:
-        # Obtener los datos de la solicitud JSON
+        # Obtener la oportunidad según el ID pasado en la URL
+        oportunidad = Oportunidad.query.get(oportunidad_id)
+        
+        # Si la oportunidad no existe, retornar un error
+        if not oportunidad:
+            return jsonify({'msg': 'Oportunidad no encontrada'}), 404
+        
+        # Obtener los datos de la tarea desde el cuerpo de la solicitud
         titulo = request.json.get('titulo')
         descripcion = request.json.get('descripcion')
-        estado = request.json.get('estado', 'pendiente')  # Estado por defecto es 'pendiente'
+        estado = request.json.get('estado', 'pendiente')
         fecha_vencimiento = request.json.get('fecha_vencimiento')
-
-        # Validar que se reciban los datos requeridos
-        if not titulo or not descripcion:
-            return jsonify({"msg": "Título y descripción son requeridos"}), 400
-
-        # Convertir fecha_vencimiento a formato datetime (si es proporcionada)
-        if fecha_vencimiento:
-            try:
-                fecha_vencimiento = datetime.fromisoformat(fecha_vencimiento)
-            except ValueError:
-                return jsonify({"msg": "Formato de fecha_vencimiento inválido"}), 400
-
-        # Seleccionar una oportunidad disponible
-        oportunidad = Oportunidad.query.filter_by(estado='disponible').first()
-        if not oportunidad:
-            return jsonify({"success": False, "error": "No hay oportunidades disponibles"}), 400
+        colaborador_id = request.json.get('colaborador_id')
 
         # Crear la nueva tarea
         nueva_tarea = Tarea(
@@ -145,28 +137,23 @@ def crear_tarea():
             descripcion=descripcion,
             estado=estado,
             fecha_vencimiento=fecha_vencimiento,
-            oportunidad_id=oportunidad.id
+            oportunidad_id=oportunidad_id,
+            colaborador_id=colaborador_id
         )
 
-        # Agregar la tarea a la sesión y guardar en la base de datos
+        # Agregar la nueva tarea a la sesión y guardar los cambios en la base de datos
         db.session.add(nueva_tarea)
         db.session.commit()
-
-        # Responder con la tarea creada
+        
         return jsonify({
-            "success": True,
-            "message": "Tarea creada exitosamente y vinculada a una oportunidad",
-            "tarea": nueva_tarea.serialize()
+            'success': True,
+            'message': 'Tarea creada exitosamente',
+            'tarea': nueva_tarea.serialize()
         }), 201
-
+    
     except Exception as e:
-        # En caso de error, deshacer los cambios en la sesión
         db.session.rollback()
-        return jsonify({
-            "success": False,
-            "error": "Error al crear la tarea",
-            "details": str(e)
-        }), 500
+        return jsonify({'msg': 'Error al crear la tarea', 'error': str(e)}), 500
 
 
 # Endpoint para crear una nueva Oportunidad
@@ -206,3 +193,79 @@ def crear_oportunidad():
     except Exception as e:
         # Manejar errores y devolver mensaje de error
         return jsonify({"msg": "Error al crear la oportunidad", "error": str(e)}), 500
+    
+    # Endpoint para obtener todas las oportunidades
+@api.route('/getoportunidades', methods=['GET'])
+@jwt_required()
+def get_oportunidades():
+    try:
+        oportunidades = Oportunidad.query.all()
+        serialized_oportunidades = [oportunidad.serialize() for oportunidad in oportunidades]
+        return jsonify(serialized_oportunidades), 200
+    
+    except Exception as e:
+        return jsonify({'msg': 'Error al recuperar oportunidades', 'error': str(e)}), 500
+    
+
+    # Endpoint para actualizar una oportunidad (PUT)
+@api.route('/oportunidades/<int:oportunidad_id>', methods=['PUT'])
+@jwt_required()
+def actualizar_oportunidad(oportunidad_id):
+    try:
+        # Buscar la oportunidad por su ID
+        oportunidad = Oportunidad.query.get(oportunidad_id)
+        
+        # Si la oportunidad no existe, retornar un error
+        if not oportunidad:
+            return jsonify({'msg': 'Oportunidad no encontrada'}), 404
+        
+        # Obtener los datos del cuerpo de la solicitud JSON
+        titulo = request.json.get('titulo', oportunidad.titulo)  # Mantener el valor actual si no se envía
+        descripcion = request.json.get('descripcion', oportunidad.descripcion)
+        estado = request.json.get('estado', oportunidad.estado)
+        colaborador_id = request.json.get('colaborador_id', oportunidad.colaborador_id)
+        
+        # Actualizar los valores de la oportunidad
+        oportunidad.titulo = titulo
+        oportunidad.descripcion = descripcion
+        oportunidad.estado = estado
+        oportunidad.colaborador_id = colaborador_id
+        
+        # Guardar los cambios en la base de datos
+        db.session.commit()
+        
+        return jsonify({
+            "success": True,
+            "message": "Oportunidad actualizada exitosamente",
+            "oportunidad": oportunidad.serialize()
+        }), 200
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'msg': 'Error al actualizar la oportunidad', 'error': str(e)}), 500
+
+
+# Endpoint para eliminar una oportunidad (DELETE)
+@api.route('/oportunidades/<int:oportunidad_id>', methods=['DELETE'])
+@jwt_required()
+def eliminar_oportunidad(oportunidad_id):
+    try:
+        # Buscar la oportunidad por su ID
+        oportunidad = Oportunidad.query.get(oportunidad_id)
+        
+        # Si la oportunidad no existe, retornar un error
+        if not oportunidad:
+            return jsonify({'msg': 'Oportunidad no encontrada'}), 404
+        
+        # Eliminar la oportunidad de la base de datos
+        db.session.delete(oportunidad)
+        db.session.commit()
+        
+        return jsonify({
+            "success": True,
+            "message": "Oportunidad eliminada exitosamente"
+        }), 200
+    
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'msg': 'Error al eliminar la oportunidad', 'error': str(e)}), 500

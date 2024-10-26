@@ -84,6 +84,7 @@ class Oportunidad(db.Model):
 
     def __repr__(self):
         return f'<Oportunidad {self.titulo} - Estado {self.estado}>' 
+    
 
 
 class Colaborador(db.Model):
