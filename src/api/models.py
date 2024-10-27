@@ -4,7 +4,7 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
-class User(db.Model):  # Cambiado a User
+class User(db.Model):  
     __tablename__ = 'usuarios'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -13,8 +13,8 @@ class User(db.Model):  # Cambiado a User
     contraseña = db.Column(db.String(500), unique=False, nullable=False)
     rol = db.Column(db.String, nullable=False)  # Ejemplo: "gerente" o "colaborador"
 
-    tareas = db.relationship("Tarea", back_populates="user")  # Actualizado a "user"
-    colaboradores = db.relationship("Colaborador", back_populates="user")  # Actualizado a "user"
+    tareas = db.relationship("Tarea", back_populates="user")  
+    colaboradores = db.relationship("Colaborador", back_populates="user")  
 
     def serialize(self):
         return {
@@ -22,55 +22,72 @@ class User(db.Model):  # Cambiado a User
             'nombre': self.nombre,
             'email': self.email,
             'rol': self.rol,
-            'tareas': [tarea.serialize() for tarea in self.tareas]  # Incluir tareas en la serialización
+            'tareas': [tarea.serialize() for tarea in self.tareas] 
         }
 
     def __repr__(self):
-        return f'<User {self.nombre} - Rol {self.rol}>'  # Actualizado a User
+        return f'<User {self.nombre} - Rol {self.rol}>' 
     
 class Tarea(db.Model):
     __tablename__ = 'tareas'
     
     id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String, nullable=False)
     descripcion = db.Column(db.String, nullable=False)
-    estado = db.Column(db.String, default='pendiente')  # Ejemplo: 'pendiente', 'completada'
+    estado = db.Column(db.String, default='pendiente')  
     fecha_vencimiento = db.Column(db.DateTime, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'))  # Actualizado a 'user_id'
+    
+    user_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
+    colaborador_id = db.Column(db.Integer, db.ForeignKey('colaboradores.id'), nullable=True)
+    oportunidad_id = db.Column(db.Integer, db.ForeignKey('oportunidades.id'))  # Sigue siendo obligatorio
 
-    user = db.relationship("User", back_populates="tareas")  # Actualizado a "User"
+    user = db.relationship("User", back_populates="tareas")
+    colaborador = db.relationship("Colaborador", back_populates="tareas")
+    oportunidad = db.relationship("Oportunidad", back_populates="tareas")
 
     def serialize(self):
         return {
             'id': self.id,
+            'titulo': self.titulo,
             'descripcion': self.descripcion,
             'estado': self.estado,
-            'fecha_vencimiento': self.fecha_vencimiento.isoformat(),  # Convertir a string
-            'user_id': self.user_id,  # Actualizado a "user_id"
+            'fecha_vencimiento': self.fecha_vencimiento.isoformat(),
+            'user_id': self.user_id,
+            'colaborador_id': self.colaborador_id,
+            'oportunidad_id': self.oportunidad_id
         }
 
     def __repr__(self):
-        return f'<Tarea {self.descripcion} - Estado {self.estado}>'
+        return f'<Tarea {self.titulo} - Descripcion {self.descripcion} - Estado {self.estado}>'
 
 class Oportunidad(db.Model):
     __tablename__ = 'oportunidades'
     
     id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String, nullable=False)  
     descripcion = db.Column(db.String, nullable=False)
-    estado = db.Column(db.String, default='disponible')  # Ejemplo: 'disponible', 'ocupada'
+    estado = db.Column(db.String, default='disponible') 
     colaborador_id = db.Column(db.Integer, db.ForeignKey('colaboradores.id'))
+    colaborador_nombre = db.Column(db.String)
 
     colaborador = db.relationship("Colaborador", back_populates="oportunidades")
+    tareas = db.relationship("Tarea", back_populates="oportunidad", cascade="all, delete-orphan")
 
     def serialize(self):
         return {
             'id': self.id,
+            'titulo': self.titulo,  
             'descripcion': self.descripcion,
             'estado': self.estado,
             'colaborador_id': self.colaborador_id,
+            'colaborador': self.colaborador.nombre if self.colaborador else None,
+            'tareas': [tarea.serialize() for tarea in self.tareas]
         }
 
     def __repr__(self):
-        return f'<Oportunidad {self.descripcion} - Estado {self.estado}>'
+        return f'<Oportunidad {self.titulo} - Estado {self.estado}>' 
+    
+
 
 class Colaborador(db.Model):
     __tablename__ = 'colaboradores'
@@ -80,9 +97,10 @@ class Colaborador(db.Model):
     email = db.Column(db.String, unique=True, nullable=False)
     rol = db.Column(db.String, default='colaborador')
 
-    user_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'))  # Actualizado a 'user_id'
-    user = db.relationship("User", back_populates="colaboradores")  # Actualizado a "User"
+    user_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'))  
+    user = db.relationship("User", back_populates="colaboradores")  
     oportunidades = db.relationship("Oportunidad", back_populates="colaborador")
+    tareas = db.relationship("Tarea", back_populates="colaborador")
 
     def serialize(self):
         return {
@@ -90,8 +108,11 @@ class Colaborador(db.Model):
             'nombre': self.nombre,
             'email': self.email,
             'rol': self.rol,
-            'oportunidades': [oportunidad.serialize() for oportunidad in self.oportunidades]
+            'oportunidades': [oportunidad.serialize() for oportunidad in self.oportunidades],
+            'tareas': [tarea.serialize() for tarea in self.tareas] 
         }
 
     def __repr__(self):
         return f'<Colaborador {self.nombre} - Rol {self.rol}>'
+
+
