@@ -68,6 +68,7 @@ class Oportunidad(db.Model):
     descripcion = db.Column(db.String, nullable=False)
     estado = db.Column(db.String, default='disponible') 
     colaborador_id = db.Column(db.Integer, db.ForeignKey('colaboradores.id'))
+    colaborador_nombre = db.Column(db.String)
 
     colaborador = db.relationship("Colaborador", back_populates="oportunidades")
     tareas = db.relationship("Tarea", back_populates="oportunidad", cascade="all, delete-orphan")
@@ -79,6 +80,7 @@ class Oportunidad(db.Model):
             'descripcion': self.descripcion,
             'estado': self.estado,
             'colaborador_id': self.colaborador_id,
+            'colaborador': self.colaborador.nombre if self.colaborador else None,
             'tareas': [tarea.serialize() for tarea in self.tareas]
         }
 

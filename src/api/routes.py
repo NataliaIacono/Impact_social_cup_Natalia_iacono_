@@ -154,6 +154,45 @@ def agregar_tarea(oportunidad_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'msg': 'Error al crear la tarea', 'error': str(e)}), 500
+    
+
+
+# Endpoint para asignar una tarea a un colaborador
+@api.route('/oportunidades/<int:oportunidad_id>/tareas/<int:tarea_id>/asignar', methods=['POST'])
+@jwt_required()
+def asignar_tarea(oportunidad_id, tarea_id):
+    try:
+        # Buscar la tarea por su ID
+        tarea = Tarea.query.filter_by(id=tarea_id, oportunidad_id=oportunidad_id).first()
+        
+        # Verificar si la tarea existe y pertenece a la oportunidad indicada
+        if not tarea:
+            return jsonify({'msg': 'Tarea no encontrada o no pertenece a la oportunidad especificada'}), 404
+        
+        # Obtener el ID del colaborador desde el JSON de la solicitud
+        colaborador_id = request.json.get('colaborador_id', None)
+        
+        # Validar que se haya enviado el colaborador_id
+        if not colaborador_id:
+            return jsonify({'msg': 'colaborador_id es requerido'}), 400
+        
+        # Asignar el colaborador a la tarea
+        tarea.colaborador_id = colaborador_id
+        
+        # Guardar los cambios en la base de datos
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Tarea asignada exitosamente al colaborador',
+            'tarea': tarea.serialize()
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'msg': 'Error al asignar la tarea', 'error': str(e)}), 500
+
+
 
 
 # Endpoint para crear una nueva Oportunidad
@@ -195,7 +234,7 @@ def crear_oportunidad():
         return jsonify({"msg": "Error al crear la oportunidad", "error": str(e)}), 500
     
     # Endpoint para obtener todas las oportunidades
-@api.route('/getoportunidades', methods=['GET'])
+@api.route('/oportunidades', methods=['GET'])
 @jwt_required()
 def get_oportunidades():
     try:
