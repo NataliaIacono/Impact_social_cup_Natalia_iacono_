@@ -269,3 +269,37 @@ def eliminar_oportunidad(oportunidad_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'msg': 'Error al eliminar la oportunidad', 'error': str(e)}), 500
+
+@api.route('/oportunidades/<int:oportunidad_id>/apuntarse', methods=['POST'])
+@jwt_required()
+def apuntarse_oportunidad(oportunidad_id):
+    try:
+        # Obtener el colaborador autenticado a partir del token JWT
+        user_id = get_jwt_identity()  # Asegúrate de que get_jwt_identity devuelva el ID del colaborador
+
+        # Buscar la oportunidad por su ID
+        oportunidad = Oportunidad.query.get(oportunidad_id)
+        
+        # Verificar que la oportunidad existe
+        if not oportunidad:
+            return jsonify({'msg': 'Oportunidad no encontrada'}), 404
+
+        # Verificar si ya tiene un colaborador asignado
+        if oportunidad.colaborador_id is not None:
+            return jsonify({'msg': 'Esta oportunidad ya tiene un colaborador asignado'}), 400
+
+        # Asignar el colaborador a la oportunidad
+        oportunidad.colaborador_id = user_id
+
+        # Guardar los cambios en la base de datos
+        db.session.commit()
+        
+        return jsonify({
+            "success": True,
+            "message": "Te has apuntado a la oportunidad exitosamente",
+            "oportunidad": oportunidad.serialize()
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'msg': 'Error al apuntarse a la oportunidad', 'error': str(e)}), 500
