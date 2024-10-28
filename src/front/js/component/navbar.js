@@ -5,7 +5,7 @@ import '../../styles/global.css';
 
 export const Navbar = () => {
 	return (
-		<nav className="navbar rounded-top bg-dark">
+		<nav className="navbar bg-dark">
 			<div className="container">
 				<Link to="/" className="text-decoration-none">
 					<h4 className="mb-0 text-naranja"><i class="fa-solid fa-spider"></i> Halloween</h4>
