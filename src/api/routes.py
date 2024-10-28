@@ -112,6 +112,19 @@ def get_colaboradores():
         return jsonify({'msg': 'Error al recuperar colaboradores', 'error': str(e)}), 500
     
 
+# Endpoint para obtener todos los usuarios
+@api.route('/usuarios', methods=['GET'])
+@jwt_required()
+def get_usuarios():
+    try:
+        usuarios = User.query.all()
+        serialized_usuarios = [usuario.serialize() for usuario in usuarios]
+        return jsonify(serialized_usuarios), 200
+    
+    except Exception as e:
+        return jsonify({'msg': 'Error al recuperar usuarios', 'error': str(e)}), 500
+    
+
 # Endpoint para agregar una tarea a una oportunidad específica
 @api.route('/oportunidades/<int:oportunidad_id>/tareas', methods=['POST'])
 @jwt_required()
