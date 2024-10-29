@@ -2,7 +2,7 @@ import React, { useEffect, useContext } from 'react';
 import { Context } from '../store/appContext';
 import { CardEquipo } from '../component/cardEquipo';
 
-export const Home = () => {
+export const HomePublico = () => {
     const { store, actions } = useContext(Context);
 
     useEffect(() => {
@@ -25,17 +25,7 @@ export const Home = () => {
                 backdropFilter: 'blur(5px)', // Opcional: agrega un efecto de desenfoque
             }}
         >
-            <h1>Equipo</h1>
-            <div className="d-flex flex-wrap justify-content-center">
-                {store.usuarios.map((usuario) => (
-                    <CardEquipo 
-                        key={usuario.id} 
-                        rol={usuario.rol} 
-                        nombre={usuario.nombre} 
-                        email={usuario.email} 
-                    />
-                ))}
-            </div>
+            
         </div>
     );
 };
