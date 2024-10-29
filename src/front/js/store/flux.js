@@ -25,7 +25,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			getMessage: async () => {
 				try {
 					// fetching data from the backend
-					const resp = await fetch(process.env.REACT_APP_BACKEND_URL + "/api/hello")
+					const resp = await fetch(process.env.BACKEND_URL + "/api/hello")
 					const data = await resp.json()
 					setStore({ message: data.message })
 					// don't forget to return something, that is how the async resolves
@@ -50,11 +50,79 @@ const getState = ({ getStore, getActions, setStore }) => {
 			},
 
 
+			signUp: async (nombre, email, contraseña, rol) => {
+				try {
+					const response = await fetch(process.env.BACKEND_URL + "/api/signUp", {
+						             
+						method: "POST", // Método de la solicitud
+						headers: {
+							"Content-Type": "application/json", // Indica que el cuerpo de la solicitud es JSON
+						},
+						body: JSON.stringify({
+							nombre: nombre,         // Nombre del usuario
+							email: email,          // Email del usuario
+							contraseña: contraseña, // Contraseña del usuario
+							rol: rol               // Rol del usuario (por ejemplo, 'colaborador')
+						}),
+					});
+			
+					// Verificamos si la respuesta no fue exitosa
+					if (!response.ok) {
+						const errorText = await response.json(); // Obtiene el texto de error en formato JSON
+						throw new Error(`Error en la solicitud de registro: ${errorText.msg}`);
+					}
+			
+					const data = await response.json(); // Procesa la respuesta en formato JSON
+					console.log('Registro exitoso:', data); // Manejo del registro exitoso
+					return data; // Devuelve los datos del usuario registrado
+				} catch (error) {
+					console.error("Error en la solicitud de registro:", error);
+					throw error; // Re-lanza el error para manejo posterior
+				}
+			},
+			
+
+
+			login: async (dataUser) => {
+				try {
+					const response = await fetch(process.env.BACKEND_URL + "/api/login", {
+						method: "POST",
+						body: JSON.stringify(dataUser),
+						headers: {
+							"Content-Type": "application/json"
+						}
+					});
+			
+					const data = await response.json();
+					console.log("Respuesta del servidor:", data);
+			
+					if (response.status !== 200) {
+						return false; // Manejo de errores si la respuesta no es exitosa
+					} else {
+						localStorage.setItem("token", data.token);
+						localStorage.setItem("user_id", data.user_id);
+						localStorage.setItem("user_nombre", data.nombre);
+						localStorage.setItem("user_email", dataUser.email);
+			
+						return true; // Login exitoso
+					}
+				} catch (error) {
+					console.error("Error en el login:", error); // Captura y muestra cualquier error
+					return false; // Devuelve false en caso de error
+				}
+			},
+			
+
+			
+
+
+
 
 			Usuarios: async () => {
 				const token = localStorage.getItem('token');
 				try {
-					const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/usuarios`, {
+					const response = await fetch(process.env.BACKEND_URL + '/api/usuarios', {
+						             
 						method: 'GET',
 						headers: {
 							'Content-Type': 'application/json',
