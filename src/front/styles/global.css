@@ -10,3 +10,17 @@
 .btn-naranja {
     background-color: #ff6600 !important;
 }
+
+
+/* global.css */
+.card.text-bg-dark {
+    background-color: #212529; /* Fondo negro */
+    border-color: #212529; /* Bordes negros */
+}
+
+.card-title, .card-text {
+    color: #ff6600 ; /* Asegura que el texto en la tarjeta sea naranja */
+}
+
+
+
