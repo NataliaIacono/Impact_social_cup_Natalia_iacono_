@@ -12,6 +12,7 @@ import { Navbar } from "./component/navbar";
 import { Footer } from "./component/footer";
 import { NavbarPrivado } from "./component/navbarPrivado";
 import { CardEquipo } from "./component/cardEquipo";
+import { HomePublico } from "./pages/homePublico";
 
 //create your first component
 const Layout = () => {
@@ -28,7 +29,7 @@ const Layout = () => {
                     <Navbar />
                     <div className="flex-grow-1">
                         <Routes>
-                            <Route element={<Home />} path="/" />
+                            <Route element={<HomePublico />} path="/" />
                             <Route element={<Demo />} path="/demo" />
                             <Route element={<Single />} path="/single/:theid" />
                             <Route element={<CardEquipo />} path="/cardequipo" />

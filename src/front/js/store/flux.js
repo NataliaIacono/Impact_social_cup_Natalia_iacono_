@@ -25,7 +25,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			getMessage: async () => {
 				try {
 					// fetching data from the backend
-					const resp = await fetch(process.env.BACKEND_URL + "/api/hello")
+					const resp = await fetch(process.env.REACT_APP_BACKEND_URL + "/api/hello")
 					const data = await resp.json()
 					setStore({ message: data.message })
 					// don't forget to return something, that is how the async resolves
@@ -51,33 +51,32 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 
 
-			// En tu archivo actions.js o donde tengas tus acciones
 			Usuarios: async () => {
 				const token = localStorage.getItem('token');
-
 				try {
-					const response = await fetch(process.env.BACKEND_URL + "/usuarios", {
-
+					const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/usuarios`, {
 						method: 'GET',
 						headers: {
 							'Content-Type': 'application/json',
 							'Authorization': `Bearer ${token}`
 						}
 					});
-
+			
 					if (!response.ok) {
+						// Si la respuesta no es ok, registra el estado y el texto completo de la respuesta
+						const errorText = await response.text();
+						console.error('Error en la respuesta del servidor:', response.status, errorText);
 						throw new Error('Error en la respuesta del servidor');
 					}
-
+			
 					const data = await response.json();
-					setStore({ usuarios: data }); // Guarda los datos en el store
+					setStore({ usuarios: data });
 				} catch (error) {
 					console.error("Error al obtener los usuarios:", error);
-					// Opcional: podrías guardar el error en el store también
 				}
 			}
-
-
+	
+			
 
 		}
 	};
