@@ -25,7 +25,8 @@ export const Home = () => {
                 backdropFilter: 'blur(5px)', // Opcional: agrega un efecto de desenfoque
             }}
         >
-            <h1>Equipo</h1>
+            <div className='mt-3 ms-5 me-5'>
+            <h1 className='text-naranja'>Equipo</h1>
             <div className="d-flex flex-wrap justify-content-center">
                 {store.usuarios.map((usuario) => (
                     <CardEquipo 
@@ -35,6 +36,7 @@ export const Home = () => {
                         email={usuario.email} 
                     />
                 ))}
+            </div>
             </div>
         </div>
     );
