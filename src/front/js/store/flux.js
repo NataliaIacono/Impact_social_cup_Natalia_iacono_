@@ -54,10 +54,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 			// En tu archivo actions.js o donde tengas tus acciones
 			Usuarios: async () => {
 				const token = localStorage.getItem('token');
-				const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
 				try {
-					const response = await fetch(`${backendUrl}/usuarios`, {
+					const response = await fetch(process.env.BACKEND_URL + "/usuarios", {
+
 						method: 'GET',
 						headers: {
 							'Content-Type': 'application/json',
