@@ -30,6 +30,7 @@ const Layout = () => {
                     <div className="flex-grow-1">
                         <Routes>
                             <Route element={<HomePublico />} path="/" />
+                            <Route element={<Home />} path="/home" />
                             <Route element={<Demo />} path="/demo" />
                             <Route element={<Single />} path="/single/:theid" />
                             <Route element={<CardEquipo />} path="/cardequipo" />

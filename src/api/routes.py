@@ -21,8 +21,8 @@ CORS(api)
 
 
 #RUTA PARA REGISTRO DE USUARIO
-@api.route('/registro', methods=['POST'])
-def registro():
+@api.route('/signUp', methods=['POST'])
+def signUp():
     nombre = request.json.get('nombre', None)
     email = request.json.get('email', None)
     contraseña = request.json.get('contraseña', None)
