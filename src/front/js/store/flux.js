@@ -25,7 +25,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 			getMessage: async () => {
 				try {
 					// fetching data from the backend
-					const resp = await fetch(process.env.REACT_APP_BACKEND_URL + "/api/hello")
+					const resp = await fetch(process.env.BACKEND_URL + "/api/hello")
 					const data = await resp.json()
 					setStore({ message: data.message })
 					// don't forget to return something, that is how the async resolves
@@ -54,7 +54,8 @@ const getState = ({ getStore, getActions, setStore }) => {
 			Usuarios: async () => {
 				const token = localStorage.getItem('token');
 				try {
-					const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/usuarios`, {
+					const response = await fetch(process.env.BACKEND_URL + '/api/usuarios', {
+						             
 						method: 'GET',
 						headers: {
 							'Content-Type': 'application/json',
